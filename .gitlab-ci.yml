@@ -1,0 +1,35 @@
+image: maven:3.8.5-openjdk-11
+
+variables:
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+.verify: &verify
+  stage: test
+  tags:
+    - test-runner
+  script:
+    - echo "USUÁRIO $GITLAB_USER_LOGIN INICIOU o job"
+    - echo "Rodando na branch de $CI_COMMIT_BRANCH"
+    - whoami && pwd
+    - mvn $MAVEN_CLI_OPTS verify
+
+verify:jdk11:
+  <<: *verify
+  except:
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy:automacao:
+  stage: deploy
+  tags:
+    - test-runner
+  script:
+    - echo "Realizando a implantação automatizada"
+    - - echo "USUÁRIO $GITLAB_USER_LOGIN INICIOU o job"
+      - echo "Rodando na  branch de $CI_COMMIT_BANCH"
+      - whoami && pwd
+      - mvn clean test
+    # Adicione os comandos de implantação aqui
+  only:
+    - main
